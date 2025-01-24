@@ -123,3 +123,8 @@ def sair():
 def feed():
     fotos = Foto.query.order_by(Foto.data_criacao.desc()).all()[:20]# limitar as 20 primeiras fotos
     return render_template('feed.html',fotos=fotos)
+
+# -------Tetes-------
+@app.route("/teste")
+def teste():
+    return render_template('teste.html')
