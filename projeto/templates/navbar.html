@@ -1,0 +1,5 @@
+<nav>
+    <a href="{{ url_for('feed') }}">Feed</a>
+    <a href="{{ url_for('perfil', field = current_user.id) }}"> Meu Perfil </a>
+    <a href="{{ url_for('sair') }}">Desconectar</a>
+</nav>

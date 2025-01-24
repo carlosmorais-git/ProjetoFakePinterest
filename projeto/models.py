@@ -14,9 +14,9 @@ def load_usuario(id_usuario):
 
 # database.Model é que permite que o database entendi essa classe 
 class Usuario(database.Model,UserMixin):
-    
+    __tablename__ = 'usuario'
     id = database.Column(database.Integer, primary_key=True)
-    username =database.Column(database.String,nullable=False,unique=True) 
+    username =database.Column(database.String,nullable=False) 
     email = database.Column(database.String,nullable=False,unique=True)
     senha = database.Column(database.String,nullable=False)
 

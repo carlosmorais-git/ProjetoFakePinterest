@@ -24,23 +24,41 @@ logging.basicConfig(level=logging.INFO) # Define o nível de detalhe (INFO e sup
 logger = logging.getLogger(__name__) # Cria um logger específico para o módulo atual
 
 
+
+
+
 # Inicializando o aplicativo Flask
 app = Flask(__name__)
-app.config['SECRET_KEY'] ='df0d7fb5941ebf58ddfbf746575a630389c45eb3' 
-# logger.info(secrets.token_hex(20))
+app.config['SECRET_KEY'] ='ce4a8b123dc22d762d3086ffe953071a' 
+# logger.info(secrets.token_hex(16))
+app.config["UPLOAD_FOLDER"] = 'static/fotos_posts'
+
+
+'''Configuração da Pasta 'instance' criada automaticamente.'''
+
+caminho_dir = os.path.abspath(os.path.dirname('main.py'))  # Caminho do diretório main
+pasta_instance = os.path.join(caminho_dir, 'instance')  # Caminho completo para 'instance'
+
+# Verifica se a pasta 'instance' existe
+if not os.path.exists(pasta_instance):
+    os.makedirs(pasta_instance)  # Cria a pasta
+
 
 # Configuração do banco de dados
 if os.getenv('DATABASE_URL'):
     app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('DATABASE_URL')  # Banco de dados no servidor
     logger.info("Banco de dados configurado para produção.")
 else:
-    app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///bancoDB.db'  # Banco de dados local
+ 
+    app.config['SQLALCHEMY_DATABASE_URI'] = f"sqlite:///{os.path.join(caminho_dir, 'instance', 'bancoDB.db')}"
+    # app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///bancoDB.db'  # Banco de dados local
     logger.info("Banco de dados configurado para desenvolvimento local.")
 
 
 # Inicializando extensões
 database = SQLAlchemy(app)  # Instância do banco de dados
 bcrypt = Bcrypt(app)
+
 login_manager = LoginManager(app)
 # dizer qual pagina irar gerenciar o meu login
 login_manager.login_view = 'home'
@@ -50,20 +68,22 @@ def verificar_banco():
     engine = sqlalchemy.create_engine(app.config['SQLALCHEMY_DATABASE_URI'])
     inspector = sqlalchemy.inspect(engine)
 
-    # Verifica se a tabela "usuario" existe
-    if not inspector.has_table("usuario"):
-        with app.app_context():
-            database.create_all()
+    with app.app_context():
+        if not inspector.has_table("usuario"):
+            database.create_all()  # Cria as tabelas
             logger.info("Banco de dados criado com as tabelas necessárias.")
-    else:
-        logger.info("Banco de dados já existe.")
+        else:
+            logger.info("Banco de dados já existe.")
 
-# Executa a verificação do banco de dados
-verificar_banco()
+
 
 # Importando rotas e modelos
 from projeto import models
 from projeto import routes
+
+# Executa a verificação do banco de dados
+verificar_banco()
+
 
 
 

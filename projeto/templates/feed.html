@@ -1,0 +1,20 @@
+<!--Extendi o arquivo base que servirá de base para todas as nossas formataçoes-->
+{% extends 'home.html' %}
+
+
+<!--Esse bloco irá substitui body da pagina base -->
+{% block body %}
+
+{% include "navbar.html" %}
+<h1>Feed Principal</h1>
+
+{% for foto in fotos %}
+<!-- Quando clicar na foto serei redirecionado para o perfil do autor da foto -->
+<a href="{{ url_for('perfil', field=foto.autor.id) }}">
+    <!-- forma certa de passar uma formatacao de strings pelo HTML nao use 'fstring' nao funciona -->
+    <img src="{{ url_for('static',filename='fotos_posts/{}'.format(foto.imagem)) }}" width="250" height="250">
+</a>
+
+{% endfor%}
+
+{% endblock %}
