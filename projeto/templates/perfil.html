@@ -5,27 +5,56 @@
 {% block body %}
 {% include "navbar.html" %}
 
-<h1>{{ titulo }}</h1>
-<p>Pagina do {{ usuario.username.title() }}!</p>
-
-<br>
 {% if formulario %}
-<form method="POST" enctype="multipart/form-data">
-    {{ formulario.csrf_token }}
+<div class="container">
+    <form class="bloco-add-img" method="POST" enctype="multipart/form-data">
 
-    {{ formulario.foto() }}
-    {{ formulario.botao_submit() }}
+        {{ formulario.csrf_token }}
 
-</form>
-{% endif %}
+        <h2>{{ usuario.username.title() }} - Enviar foto</h2>
 
-<!-- Exiba todas as fotos disponiveis no perfil olhado -->
+        <div class="bloco-arquivo">
+            <label for="foto" class="botao-arquivo">
+                Escolher arquivo
+                {{ formulario.foto(class="input-arquivo",id="foto") }}
+            </label>
+            <span id="imagem-arquivo" class=""></span>
+        </div>
 
-{% for foto in usuario.fotos %}
-<!-- forma certa de passar uma formatacao de strings pelo HTML nao use 'fstring' nao funciona -->
-<img src="{{ url_for('static',filename='fotos_posts/{}'.format(foto.imagem)) }}" width="250" height="250">
+        {{ formulario.botao_submit(class="botao-login") }}
+    </form>
 
-{% endfor%}
+    {% else %}
+    <div class="bloco-add-img">
+        <h2>{{ usuario.username.title() }} - Ver Perfil</h2>
+    </div>
+
+    {% endif %}
+
+    <!-- Exiba todas as fotos disponiveis no perfil olhado -->
+    <div class="conteudo">
+        {% for foto in usuario.fotos %}
+
+        <!-- forma certa de passar uma formatacao de strings pelo HTML nao use 'fstring' nao funciona -->
+
+        <div class="bloco-imagem">
+            <img src="{{ url_for('static',filename='fotos_posts/{}'.format(foto.imagem)) }}" />
+        </div>
 
 
+        {% endfor%}
+
+    </div>
+</div>
+<script>
+    let input = document.getElementById("foto");
+    let imagemArquivo = document.getElementById("imagem-arquivo");
+
+    input.addEventListener("change", () => {
+        let inputImagem = document.querySelector("input[type=file]").files[0];
+
+        imagemArquivo.classList.add("visivel");
+        imagemArquivo.innerText = inputImagem.name;
+    });
+</script>
 {% endblock %}

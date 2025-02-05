@@ -1,0 +1,4 @@
+1- Opcao de deletar fotos
+2- Rolar tela
+3- Campo usuarios
+4- Salvar foto ou comprar fotos de outros usuarios

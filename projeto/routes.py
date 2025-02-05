@@ -29,11 +29,13 @@ def home():
     if formulario.validate_on_submit():
         # valor passado usuario ou email
         identificador = formulario.identificador.data
+        # Usuario recuperado com letra minuscula
+        identificador_recuperado = str(identificador).lower()
         usuario = None
         # Procurando o usuário pelo identificador (email ou username)
         # Para verificar se é email ou username, faço isso com único filter() usando 'or_' do SQLAlchemy. 
         usuario = Usuario.query.filter(
-            or_(Usuario.email == identificador, Usuario.username == identificador)
+            or_(Usuario.email == identificador, Usuario.username == identificador_recuperado)
         ).first()
 
 
@@ -51,22 +53,26 @@ def home():
 
 @app.route('/criar-conta',methods=['GET','POST'])
 def criar_conta():
-    # criando uma instancia do formulario Criar Conta
+    # Criando uma instancia do formulario Criar Conta
     formulario = CriarConta()
 
     if formulario.validate_on_submit():
-        # criptografando minha senha
+        # Criptografando minha senha
         senha_criptrografada = bcrypt.generate_password_hash(formulario.senha.data)
 
-        # criar um usuario e adicionar no banco
-        usuario = Usuario(username=formulario.usuario.data,email=formulario.email.data,senha=senha_criptrografada)
+        # Criar um usuário e adicionar no banco de dados
+        # Convertendo o nome de usuário para minúsculas
+        name = str(formulario.usuario.data).lower()
+        usuario = Usuario(username=name,
+                          email=formulario.email.data,
+                          senha=senha_criptrografada)
         database.session.add(usuario)
 
         # salvo o novo usuario no banco de dados
         database.session.commit()
 
-        # logando no site após ser criado com sucesso
-        # remember=True pare lembrar que o usuario está logado
+        # Logando no site após ser criado com sucesso
+        # Remember=True pare lembrar que o usuario está logado
         login_user(usuario,remember=True)
         return redirect(url_for("perfil",field=usuario.id))
 
