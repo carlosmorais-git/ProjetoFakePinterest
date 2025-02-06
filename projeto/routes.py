@@ -51,14 +51,15 @@ def home():
 
     return render_template('home.html',titulo='Pagina inicial',formulario=formulario)
 
+
 @app.route('/criar-conta',methods=['GET','POST'])
 def criar_conta():
     # Criando uma instancia do formulario Criar Conta
     formulario = CriarConta()
 
     if formulario.validate_on_submit():
-        # Criptografando minha senha
-        senha_criptrografada = bcrypt.generate_password_hash(formulario.senha.data)
+        # Criptografando minha senha e passa o '.decode('utf-8')' para funcionar em producao
+        senha_criptrografada = bcrypt.generate_password_hash(formulario.senha.data).decode('utf-8')
 
         # Criar um usuário e adicionar no banco de dados
         # Convertendo o nome de usuário para minúsculas
