@@ -21,3 +21,8 @@ SQLAlchemy==2.0.37
 typing_extensions==4.12.2
 Werkzeug==3.1.3
 WTForms==3.2.1
+<<<<<<< HEAD
+=======
+
+
+>>>>>>> 76142cb6a0f2d46d527f0637677161724ec5ec1b
