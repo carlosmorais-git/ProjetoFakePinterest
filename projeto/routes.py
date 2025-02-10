@@ -1,6 +1,6 @@
 # **********ARQUIVO DE CRIAÇÃO PARA ROTAS DAS PAGINAS**********
 
-from flask import render_template,url_for,flash,redirect,request
+from flask import render_template,url_for,flash,redirect,request,abort
 from projeto import app,bcrypt,database,logger
 from sqlalchemy import or_
 from flask_login import login_required,login_user,logout_user,current_user
@@ -131,7 +131,23 @@ def feed():
     fotos = Foto.query.order_by(Foto.data_criacao.desc()).all()[:20]# limitar as 20 primeiras fotos
     return render_template('feed.html',fotos=fotos)
 
+
+
+@app.route('/foto/<field>/excluir', methods=["GET", "POST"])
+@login_required# bloqueia a pagina caso nao faço login
+def excluir_foto(field):
+    foto = Foto.query.get(field)
+    # se sou o dono da foto posso excluir
+    if current_user == foto.autor:
+        database.session.delete(foto)
+        database.session.commit()
+        flash('Post Excluido', category='alert-danger')
+        return redirect(url_for("home"))
+    else:
+        abort(403)
+
+
 # -------Testa funcionalidade-------
 @app.route("/teste")
 def teste():
-    return render_template('teste.html')
+    return render_template('teste1.html')

@@ -35,13 +35,13 @@ app.config['SECRET_KEY'] = 'ce4a8b123dc22d762d3086ffe953071a'
 # # Se a variável UPLOAD_FOLDER estiver definida, usa esse valor
 # # Caso contrário, usa "static/fotos_posts" como padrão
 
-UPLOAD_FOLDER = os.getenv("UPLOAD_FOLDER", os.path.join(os.path.abspath(os.path.dirname(__file__)), "static/fotos_posts"))
+# UPLOAD_FOLDER = os.getenv("UPLOAD_FOLDER", os.path.join(os.path.abspath(os.path.dirname(__file__)), "static/fotos_posts"))
 
-# Garante que a pasta de uploads existe no ambiente de produção e local
-if not os.path.exists(UPLOAD_FOLDER):
-    os.makedirs(UPLOAD_FOLDER, exist_ok=True)
+# # Garante que a pasta de uploads existe no ambiente de produção e local
+# if not os.path.exists(UPLOAD_FOLDER):
+#     os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
-app.config["UPLOAD_FOLDER"] = UPLOAD_FOLDER
+app.config["UPLOAD_FOLDER"] = "static/fotos_posts"
 
 
 
