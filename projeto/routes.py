@@ -150,4 +150,4 @@ def excluir_foto(field):
 # -------Testa funcionalidade-------
 @app.route("/teste")
 def teste():
-    return render_template('teste1.html')
+    return render_template('teste.html')
