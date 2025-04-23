@@ -8,6 +8,8 @@
 
   <!-- Vinculando o Estilo -->
   <link href="{{ url_for('static',filename='css/style.css') }}" rel="stylesheet">
+  <link rel="icon" href="{{ url_for('static', filename='download.png') }}" type="image/x-icon">
+
 
   {% block head %}
 
@@ -49,8 +51,14 @@
     <div class="container-popup">
 
       {% block formulario %}
-      {% if not current_user.is_authenticated %}
 
+      {% if current_user.is_authenticated %}
+      <script>
+        window.location.href = "{{ url_for('perfil', field=current_user.id) }}";
+      </script>
+
+      
+      {% else %}
       <form method="POST" class="popup">
         {{ formulario.csrf_token }}
 
@@ -94,24 +102,42 @@
             <a href="{{ url_for('criar_conta')}}" class="link-criarconta">Não tem uma conta? Crie aqui</a>
           </div>
 
-      </form>
+      </form>    
       {% endif%}
       {% endblock %}
 
+     
+      
+      
     </div>
   </div>
 
   {% endblock %}
   <script>
     document.addEventListener("DOMContentLoaded", () => {
-    const images = document.querySelectorAll("img");
-
-    images.forEach(img => {
+      const images = document.querySelectorAll("img");
+      
+      images.forEach(img => {
         img.onload = () => {
             img.classList.add("loaded"); // Aplica o efeito de transição suave
         };
-    });
+      });
 });
+
+      document.querySelectorAll('.bloco-imagem img').forEach(img => {
+        img.onload = () => {
+          const ratio = img.naturalWidth / img.naturalHeight;
+          const container = img.closest('.bloco-imagem');
+      
+          if (ratio > 1.5) {
+            container.classList.add('grid-col-2');  // imagem mais larga
+          } else if (ratio < 0.7) {
+            container.classList.add('grid-row-2');  // imagem mais vertical
+          } else {
+            // mantém padrão
+          }
+        };
+      });
 
   </script>
 </body>

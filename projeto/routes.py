@@ -23,6 +23,10 @@ from werkzeug.utils import secure_filename
 @app.route('/',methods=['GET','POST'])
 def home():
 
+    # Verifica se o usuário já está autenticado. Se sim, redireciona para a página de perfil.
+    if current_user.is_authenticated:
+        return redirect(url_for('perfil', field=current_user.id))  # ou outro identificador
+
     # criando uma instancia do formulario Login
     formulario = FazerLogin()
 
@@ -106,12 +110,13 @@ def perfil(field):
             database.session.add(foto)            
             database.session.commit()
         
-        return render_template('perfil.html',titulo='Meu Perfil',usuario = current_user,formulario=formulario)
+        return render_template('perfil.html',titulo='Meu Perfil',usuario=current_user,
+                               formulario=formulario)
 
     else:
         # terá permissão de só ler as fotos do perfil
         field = Usuario.query.get(int(field))
-        return render_template('perfil.html',titulo='Meu Perfil',usuario = field,formulario=None)
+        return render_template('perfil.html',titulo='Meu Perfil',usuario=field,formulario=None)
 
 
 # -------Deslogar da conta logada-------
@@ -136,15 +141,22 @@ def feed():
 @app.route('/foto/<field>/excluir', methods=["GET", "POST"])
 @login_required# bloqueia a pagina caso nao faço login
 def excluir_foto(field):
-    foto = Foto.query.get(field)
+    foto = Foto.query.get_or_404(field)
+
     # se sou o dono da foto posso excluir
     if current_user == foto.autor:
         database.session.delete(foto)
         database.session.commit()
-        flash('Post Excluido', category='alert-danger')
-        return redirect(url_for("home"))
+        flash('Foto Excluida', category='alert-danger')
+        return redirect(url_for("perfil", field=current_user.id))
     else:
         abort(403)
+
+@app.route('/foto/<int:id>')
+def ver_foto(id):
+    foto = Foto.query.get_or_404(id)
+    return render_template('ver_foto.html', foto=foto)
+
 
 
 # -------Testa funcionalidade-------

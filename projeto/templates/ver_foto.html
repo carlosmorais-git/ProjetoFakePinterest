@@ -1,0 +1,32 @@
+{% extends 'home.html' %} {% block body %} {% include 'navbar.html' %}
+<div class="pagina-ver-foto">
+  <div class="info-foto">
+    <p><strong>Curtidas</strong>5.459 👍</p>
+    <p><strong>Compartilhamentos</strong>832</p>
+    <p><strong>Qualidade</strong>Ótima</p>
+    <p><strong>Formatos</strong>.PNG .JPEG</p>
+    <p><strong>História da Foto</strong>Conte como foi tirar essa foto…</p>
+  </div>
+
+  <div class="imagem-central">
+    <h2>Foto de {{ foto.autor.username.title() }}</h2>
+    <img
+      src="{{ url_for('static', filename='fotos_posts/{}'.format(foto.imagem)) }}"
+    />
+    <div class="botoes-ver-foto">
+      <!-- <button class="btn-preto" >Download</button> -->
+      <a
+        href="{{ url_for('static', filename='fotos_posts/{}'.format(foto.imagem)) }}"
+        download
+        class="btn-preto"
+        style="text-decoration: none"
+        >Download</a
+      >
+
+      <button class="btn-preto">Compartilhar</button>
+      <button class="btn-preto">Curtir</button>
+      <button class="btn-vermelho">Salvar</button>
+    </div>
+  </div>
+</div>
+{% endblock %}
