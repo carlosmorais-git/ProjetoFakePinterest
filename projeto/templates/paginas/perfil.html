@@ -1,0 +1,116 @@
+{% extends 'home.html' %}
+<!--  -->
+{% block title %}Perfil - FakePinterest{% endblock %}
+<!--  -->
+{% block body %}
+<!--  -->
+{% include "componentes/_navbar.html" %}
+
+<!--  -->
+{% if formulario %}
+
+<div class="container">
+  <form
+    id="form-upload-foto"
+    class="bloco-add-img"
+    method="POST"
+    enctype="multipart/form-data"
+    data-upload-url="{{ url_for('perfil', field=usuario.id) }}"
+  >
+    {{ formulario.csrf_token }}
+
+    <h2>{{ usuario.username.title() }} - Enviar foto</h2>
+
+    <div id="formulario-add-foto" class="formulario-add-foto">
+      <div style="text-align: center">
+        <div class="bloco-arquivo" id="bloco-arquivo-img">
+          <label for="foto" class="botao-arquivo">
+            Escolher Imagem{{ formulario.foto(class="input-arquivo", id="foto")
+            }}
+          </label>
+        </div>
+        {{ formulario.botao_submit(class="botao-login", value='Publicar',
+        id='bt-postar-img', style='display: none;') }}
+        <!--  -->
+        {% set cancelar_url = url_for('perfil', field=usuario.id) %}
+        <button
+          id="btn-cancelar-escolher"
+          type="button"
+          class="btn-ver"
+          style="
+            font-size: larger;
+            width: 45px;
+            height: 45px;
+            border-radius: 47px;
+            display: none;
+          "
+        >
+          x
+        </button>
+      </div>
+      <span id="imagem-arquivo" class=""></span>
+    </div>
+  </form>
+  <hr />
+</div>
+{% else %}
+<div class="bloco-add-img">
+  <h2>{{ usuario.username.title() }} - Ver Perfil</h2>
+</div>
+{% endif %}
+
+<!-- Exibe todas as fotos do perfil -->
+<div id="galeria-fotos" class="conteudo">
+  {% set pattern = ['grid-row-2', '', ''] %}
+  <!--  -->
+
+  <!--  -->
+  {%set lista_fotos = usuario.fotos[::-1]%} {% for foto in lista_fotos %}
+  <!--  -->
+  {% set ativa = foto.id in fotos_salvas_ids %}
+  <div
+    class="bloco-imagem {{ pattern[loop.index0 % pattern|length] }} "
+    img-id="/foto/{{ foto.id }}/excluir"
+  >
+    {% set link_foto = url_for("excluir_foto", field=foto.id) %}
+    <!--  -->
+    {% if current_user.is_authenticated and current_user.id == usuario.id %}
+    <div class="acoes-img">
+      <a href="{{ url_for('ver_foto', id=foto.id) }}" class="btn-ver">Ver</a>
+      <a
+        href="#"
+        class="btn-excluir"
+        onclick='executarExclusao("{{ link_foto }}"); return false;'
+        >Excluir</a
+      >
+    </div>
+    {% else %}
+
+    <div class="acoes-img">
+      <a href="{{ url_for('ver_foto', id=foto.id) }}" class="btn-ver">Ver</a>
+
+      <button
+        class="btn-salvar {% if ativa %}ativo{% endif %}"
+        id="btn-salvar-{{ foto.id }}"
+        data-id="{{ foto.id }}"
+        data-ativo="{{ 'true' if ativa else 'false' }}"
+        onclick="salvarImagem('{{ foto.id }}')"
+      >
+        {% if ativa %}Salvo{% else %}Salvar{% endif %}
+      </button>
+    </div>
+
+    {% endif %}
+    <a href="{{ url_for('ver_foto', id=foto.id) }}">
+      <img
+        loading="lazy"
+        src="{{ url_for('static', filename='fotos_posts/' ~ foto.imagem) }}"
+      />
+    </a>
+  </div>
+  {% endfor %}
+</div>
+<!-- Menu Fotos Salvas -->
+{% include "componentes/_salvos.html" %}
+<!--  -->
+{% endblock %}

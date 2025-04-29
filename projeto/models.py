@@ -1,4 +1,32 @@
 # **********ARQUIVO DE CRIAÇÃO DOS MODELOS DE BANCO DE DADOS**********
+"""
+❗❗ MIGRAÇÕES COM FLASK-MIGRATE (como no Django)
+
+Comandos principais (executar no terminal, na raiz do projeto):
+
+1. Inicializar (só uma vez no projeto):
+   flask --app projeto db init
+
+2. Criar nova migração ao alterar models:
+   flask --app projeto db migrate -m "descrição da alteração"
+   ou
+   flask db migrate -m "adiciona campo nome na tabela salvo"
+
+3. Aplicar a migração ao banco:
+   flask --app projeto db upgrade
+   ou
+   flask db upgrade
+
+❗❗ Dica: 
+- Toda vez que criar/editar um model, execute os passos 2 e 3.
+- O diretório 'migrations/' guarda o histórico de alterações.
+- Isso evita apagar o banco sempre que fizer mudanças.
+
+❗❗ Recriar o banco (em dev):
+- Apagar bancoDB.db e pasta migrations/
+- Repetir os passos acima
+
+"""
 
 from projeto import database,login_manager
 from datetime import datetime
@@ -31,3 +59,16 @@ class Foto(database.Model):
     data_criacao = database.Column(database.DateTime,nullable=False, default=datetime.now())
     # chave estrangeira ForeignKey
     id_usuario = database.Column(database.Integer, database.ForeignKey('usuario.id'),nullable=False)
+
+
+class Salvo(database.Model):
+    id = database.Column(database.Integer, primary_key=True)    
+    # Chave estrangeira para a tabela Usuario
+    # Este campo é o id do usuario que salvou a foto
+    usuario_id = database.Column(database.Integer, database.ForeignKey('usuario.id'))
+    # Este campo é o id da foto que foi salva
+    foto_id = database.Column(database.Integer, database.ForeignKey('foto.id'))
+    foto = database.relationship('Foto', backref='salvos')
+    # Ativo ou não o salvamento da foto
+    ativo = database.Column(database.Boolean, default=False)
+

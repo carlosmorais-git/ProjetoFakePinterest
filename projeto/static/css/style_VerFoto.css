@@ -1,0 +1,259 @@
+/* VER FOTOS BASE */
+
+.pagina-ver-foto {
+  display: flex;
+  gap: 50px;
+  padding-right: 50px;
+  padding-left: 50px;
+  flex-wrap: wrap;
+}
+
+.info-foto {
+  flex: 1;
+  min-width: 240px;
+  background: #f8f8f8;
+  border-radius: 12px;
+  padding: 24px;
+  font-size: 15px;
+  color: #333;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  line-height: 1.6;
+}
+
+.info-foto p {
+  margin-bottom: 16px;
+}
+
+.info-foto strong {
+  display: block;
+  font-weight: 600;
+  font-size: 14px;
+  margin-bottom: 4px;
+  color: #111;
+}
+
+.imagem-central {
+  flex: 2;
+  min-width: 300px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+}
+
+.imagem-central img {
+  max-width: 100%;
+  border-radius: 12px;
+}
+
+.botoes-ver-foto {
+  margin-top: 20px;
+  display: flex;
+  gap: 10px;
+}
+
+.btn-preto {
+  background-color: #333;
+  color: white;
+  padding: 8px 14px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.btn-vermelho {
+  background-color: #e60000;
+  color: white;
+  padding: 8px 14px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.img-ver-foto {
+  max-height: 588px;
+}
+@media (max-width: 570px) {
+  .img-ver-foto {
+    width: 340px;
+    max-height: 547px;
+  }
+}
+.bloco-descricao {
+  margin-top: 20px;
+  margin-bottom: 20px;
+  padding: 15px;
+  background-color: #f3f3f3;
+  border-radius: 10px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+  font-family: "Segoe UI", sans-serif;
+}
+
+.titulo-foto {
+  font-size: 20px;
+  margin-bottom: 5px;
+  font-weight: bold;
+}
+
+.meta-foto {
+  font-size: 14px;
+  color: #777;
+  margin-bottom: 10px;
+}
+
+.frase-impacto {
+  font-style: italic;
+  font-size: 15px;
+  color: #444;
+}
+/* FOTOS MINIATURA */
+.pagina-ver-foto {
+  display: flex;
+  gap: 20px;
+  align-items: flex-start;
+}
+
+.foto-grande {
+  flex: 1;
+  order: 1; /* padrão */
+  justify-items: center;
+  max-width: 590px;
+}
+.mais-do-autor {
+  padding: 20px;
+}
+
+.fotos-autor {
+  display: grid;
+  gap: 5px;
+  flex-wrap: wrap;
+  flex-direction: column;
+}
+
+.fotos-autor img {
+  width: 250px;
+  height: 250px;
+  object-fit: cover;
+  border-radius: 8px;
+}
+.fotos-autor img:hover {
+  transform: scale(1.02);
+  transition: all 0.3s ease-in-out;
+  /* coloca uma mascara na imagem quase trasparente */
+  filter: brightness(0.8);
+}
+
+/* Quando quiser que o Kratos venha por cima (modo mobile ou artístico) */
+@media (max-width: 905px) {
+  .pagina-ver-foto {
+    flex-direction: column;
+    align-items: center;
+    padding-right: 10px;
+    padding-left: 10px;
+  }
+
+  .foto-grande {
+    order: 0; /* Kratos em cima */
+  }
+
+  .fotos-autor {
+    display: block;
+    width: 100%;
+  }
+
+  .fotos-autor img {
+    width: 160px;
+    height: 160px;
+    object-fit: cover;
+  }
+}
+@media (max-width: 570px) {
+  .topo-foto {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 10px;
+    background: white;
+    border-radius: 10px 10px 0 0;
+    flex-direction: column;
+  }
+
+  .fotos-autor img {
+    width: 120px;
+    height: 120px;
+    object-fit: cover;
+  }
+}
+/* MENU SOBRE FOTO */
+.topo-foto {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 10px;
+  background: white;
+  border-radius: 10px 10px 0 0;
+}
+
+.acoes-esquerda,
+.acoes-direita {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.icone {
+  font-size: 14px;
+  cursor: pointer;
+  user-select: none;
+}
+
+.btn-salvar {
+  background: rgb(207, 14, 14);
+  color: white;
+  border: none;
+  border-radius: 25px;
+  padding: 6px 14px;
+  font-size: 16px;
+  cursor: pointer;
+}
+.btn-salvar.ativo {
+  background: black;
+  border-radius: 25px;
+}
+.btn-salvar:hover {
+  background: #0000009c;
+}
+
+.dropdown-formatos {
+  position: relative;
+}
+
+.dropdown-btn {
+  background: #eee;
+  border: none;
+  padding: 6px 12px;
+  cursor: pointer;
+  border-radius: 25px;
+}
+.dropdown-btn:active,
+.dropdown-btn:link,
+.dropdown-btn:visited {
+  color: black;
+}
+
+.dropdown-menu {
+  display: none;
+  position: absolute;
+  top: 110%;
+  right: 0;
+  background: white;
+  border: 1px solid #ddd;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  padding: 6px 12px;
+  border-radius: 6px;
+  z-index: 10;
+}
+
+.dropdown-formatos:hover .dropdown-menu {
+  display: block;
+}

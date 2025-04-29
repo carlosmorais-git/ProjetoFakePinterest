@@ -1,0 +1,49 @@
+{% extends 'home.html' %}
+<!--  -->
+{% block title %}Foto - FakePinterest{% endblock %}
+<!--  -->
+{% block body %}
+<!--  -->
+{% include 'componentes/_navbar.html' %}
+<!--  -->
+{% set ativa = foto.id in fotos_salvas_ids %}
+<div class="pagina-ver-foto">
+  {% include 'componentes/_miaturas_imagem_user.html' %}
+  <div class="imagem-central">
+    {% include 'componentes/_menu_verfotos.html' %}
+
+    <div class="foto-grande">
+      <img
+        class="img-ver-foto"
+        src="{{ url_for('static', filename='fotos_posts/{}'.format(foto.imagem)) }}"
+      />
+      <div class="bloco-descricao">
+        <h2 class="titulo-foto">A fúria de um guerreiro</h2>
+        <p class="meta-foto">
+          Postado em <strong>22 de abril de 2024</strong> por
+          <strong>{{ foto.autor.username.title() }}</strong>
+        </p>
+        <p class="frase-impacto">
+          "Força não é medida pelos músculos, mas pela presença que domina o
+          ambiente."
+        </p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal e Logica de exclusão de Imagem -->
+
+<div id="modal-confirmacao" class="modal" style="display: none">
+  <div class="modal-conteudo">
+    <p>Tem certeza que deseja excluir esta imagem?</p>
+    <form id="form-exclusao" method="POST" action="">
+      <button type="submit" class="btn-confirmar">Sim, excluir</button>
+      <button type="button" class="btn-cancelar" onclick="fecharModal()">
+        Cancelar
+      </button>
+    </form>
+  </div>
+</div>
+
+{% endblock %}

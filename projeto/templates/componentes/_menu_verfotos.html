@@ -1,0 +1,60 @@
+<div class="topo-foto">
+  <div class="acoes-esquerda">
+    <span class="icone"><i>♡</i> 249</span>
+    <span class="icone">💬</span>
+    <span class="icone">📤</span>
+
+    <span class="icone">⋯</span>
+
+    <span class="nome-imagem">Projeto</span>
+  </div>
+  <div class="acoes-direita">
+    {% if current_user.is_authenticated and current_user.id == foto.autor.id %}
+    <a
+      href="#"
+      class="btn-excluir"
+      onclick='confirmarExclusao("{{ link_foto }}"); return false;'
+      >Excluir</a
+    >
+    {% else %}
+
+    <button
+      class="btn-salvar {% if ativa %}ativo{% endif %}"
+      id="btn-salvar-{{ foto.id }}"
+      data-id="{{ foto.id }}"
+      data-ativo="{{ 'true' if ativa else 'false' }}"
+      onclick="salvarImagem('{{ foto.id }}')"
+    >
+      {% if ativa %}Salvo{% else %}Salvar{% endif %}
+    </button>
+
+    <a
+      href="{{ url_for('perfil', field=foto.autor.id) }}"
+      class="dropdown-btn"
+      style="text-decoration: none"
+      >Ver mais..</a
+    >
+    {% endif %}
+
+    <div class="dropdown-formatos">
+      <button class="dropdown-btn">Formatos</button>
+      <div class="dropdown-menu">
+        <span>.JPG</span>
+        <span>.PNG</span>
+        <span>.WEBP</span>
+      </div>
+    </div>
+    <!-- <button class="btn-preto" >Download</button> -->
+    <a
+      href="{{ url_for('static', filename='fotos_posts/{}'.format(foto.imagem)) }}"
+      download
+      style="text-decoration: none"
+    >
+      <img
+        src="{{ url_for('static', filename='icone/icon_download.svg') }}"
+        alt="Baixar imagem"
+        style="width: 40px; height: 40px"
+      />
+    </a>
+  </div>
+</div>

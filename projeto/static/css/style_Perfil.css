@@ -1,0 +1,134 @@
+/* PERFIL */
+.formulario-add-foto {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  height: 134px;
+  gap: 10px;
+}
+
+/* VER FOTOS SALVAS */
+.botao-flutuante {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  background-color: #e60000;
+  color: white;
+  border: none;
+  border-radius: 50%;
+  font-size: 24px;
+  width: 50px;
+  height: 50px;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  z-index: 1000;
+}
+.h3_navbar {
+  width: 100%;
+  height: auto;
+  padding: 16px 20px;
+  background-color: #ddd;
+  position: sticky;
+  top: 0;
+  left: 0;
+  z-index: 1000;
+  font-size: 1.1rem;
+  font-weight: bold;
+  border-bottom: 1px solid #ccc;
+}
+
+.menu-salvos {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 300px;
+  background-color: #ddd;
+  padding: 0 20px 20px;
+  border-top-left-radius: 12px;
+  border-top-right-radius: 12px;
+  box-shadow: 0 -4px 10px rgba(0, 0, 0, 0.1);
+  transform: translateY(100%);
+  transition: transform 0.4s ease;
+  z-index: 999;
+  overflow-y: auto;
+}
+
+.menu-salvos.ativo {
+  transform: translateY(0);
+}
+
+/* Adicionar imagem */
+.bloco-add-img {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  row-gap: 10px;
+}
+
+.botao-arquivo {
+  padding: 5px 10px;
+  border-radius: 15px;
+  border: 0;
+  background-color: #333;
+  color: #fff;
+  font-size: 16px;
+  cursor: pointer;
+}
+
+.bloco-arquivo {
+  background-color: #eee;
+  padding: 10px 20px;
+  border-radius: 55px;
+  display: flex;
+  align-items: center;
+  column-gap: 10px;
+  margin-bottom: 10px;
+}
+
+.input-arquivo {
+  display: none;
+}
+
+#imagem-arquivo {
+  display: none;
+}
+
+#imagem-arquivo.visivel {
+  display: inline-block;
+}
+
+.bloco-add-img .botao-login {
+  width: auto;
+}
+
+.bloco-input-botao {
+  display: flex;
+  column-gap: 20px;
+}
+
+/* Exibir imagem */
+.galeria-salvos {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(170px, 183px));
+  gap: 12px;
+  padding-top: 10px;
+  padding-left: 10px;
+  padding-right: 10px;
+}
+.galeria-salvo_mensagem {
+  margin-top: 20px;
+  color: #555;
+  width: 270px;
+}
+
+.img-salva {
+  width: 100%;
+  border-radius: 8px;
+  object-fit: cover;
+  transition: transform 0.3s ease;
+}
+
+.img-salva:hover {
+  transform: scale(1.05);
+}

@@ -1,14 +1,16 @@
 # **********ARQUIVO DE CRIAÇÃO PARA ROTAS DAS PAGINAS**********
 
-from flask import render_template,url_for,flash,redirect,request,abort
+from flask import render_template,url_for,flash,redirect,request,abort,jsonify,current_app
 from projeto import app,bcrypt,database,logger
 from sqlalchemy import or_
 from flask_login import login_required,login_user,logout_user,current_user
 from projeto.forms import CriarConta,FazerLogin,FormFoto
-from projeto.models import Usuario, Foto
+from projeto.models import Usuario, Foto,Salvo
 import os
 from werkzeug.utils import secure_filename
-
+import random
+from datetime import datetime
+from PIL import Image
 # render_template - renderiza uma pagina html para uma rota
 # url_for - permite que recupero url das funcoes de maneira dinamica em vez de escreve elas assim '/caminho'
 # flash - mensagem de alerta
@@ -20,6 +22,58 @@ from werkzeug.utils import secure_filename
 # request - faz requisição na url da pagina
 # werkzeug.utils - modifica um nome de arquivo para ficar seguro
 
+
+
+def salvar_imagem_upload(foto, pasta_upload_base, usuario_id):
+    # Cria a subpasta se não existir
+    pasta_usuario = os.path.join(pasta_upload_base, f"usuario_{usuario_id}")
+    os.makedirs(pasta_usuario, exist_ok=True)  # cria a pasta se ainda não existe
+
+    # Nome original seguro
+    nome_original = secure_filename(foto.filename)
+
+    # Se o nome estiver vazio, gera um nome padrão
+    #.strftime('%Y%m%d%H%M%S') gera um timestamp para evitar duplicidade
+    if not nome_original:
+        nome_original = f"imagem_{datetime.now().strftime('%Y%m%d%H%M%S')}.jpg"
+
+    # Separa extensão
+    #.splitext() separa o nome do arquivo da extensão
+    nome_base, extensao = os.path.splitext(nome_original)
+    extensao = extensao.lower()
+
+    # Extensões permitidas
+    extensoes_validas = ['.jpg', '.jpeg', '.png', '.gif', '.webp']
+
+    # Se a extensão for suspeita tipo .jfif, .jiff, etc, corrige para .jpg
+    # Converter para .jpg é mais seguro e compatível com a maioria dos navegadores
+    if extensao not in extensoes_validas:
+        extensao = '.jpg'
+
+    # Gera nome único
+    nome_seguro = f"{datetime.now().strftime('%Y%m%d%H%M%S')}_{usuario_id}{extensao}"
+
+    # Caminho final
+    caminho_final = os.path.join(pasta_usuario, nome_seguro)
+
+    # Salvar imagem (com conversão se necessário)
+    try:
+        img = Image.open(foto)
+        img.convert('RGB').save(caminho_final, format='JPEG')  # Sempre salva como JPEG para padronizar
+    except Exception as e:
+        print("Erro ao processar imagem:", e)
+        # Se der erro ao abrir com PIL, salva bruto mesmo
+        foto.save(caminho_final)
+
+    # Retorna o caminho relativo para salvar no banco de dados
+    caminho_relativo = os.path.join(f"usuario_{usuario_id}", nome_seguro).replace("\\", "/")  # Substitui as barras invertidas por barras normais para compatibilidade com URLs
+
+    return caminho_relativo
+
+
+    
+
+# -------Rotas-------
 @app.route('/',methods=['GET','POST'])
 def home():
 
@@ -81,43 +135,81 @@ def criar_conta():
         login_user(usuario,remember=True)
         return redirect(url_for("perfil",field=usuario.id))
 
-    return render_template('criar_conta.html',titulo='Criar Conta',formulario=formulario)
+    return render_template('paginas/criar_conta.html',titulo='Criar Conta',formulario=formulario)
 
-@app.route('/perfil/<field>',methods=['GET','POST'])
-@login_required# bloqueia a pagina caso nao faço login 
+@app.route('/perfil/<field>', methods=['GET', 'POST'])
+@login_required
 def perfil(field):
-
+    fotos_salvas = []    
+    
     if int(field) == int(current_user.id):
-        # irei passar o controle para o usuario logado
-        formulario = FormFoto()
-        if formulario.validate_on_submit():
-
-            # recuperando o caminho da foto passada pelo usuario
-            arquivo = formulario.foto.data
-
-            # deixa o nome do arquivo seguro para salvar
-            nome_seguro = secure_filename(arquivo.filename)
-
-            # configuração do caminho onde irei salvar as fotos
-            caminho_pasta_projeto = os.path.abspath(os.path.dirname(__file__))
-            caminho = os.path.join(caminho_pasta_projeto, 
-                              app.config["UPLOAD_FOLDER"], 
-                              nome_seguro)
-            arquivo.save(caminho)
-
-            # salvar uma nova foto no banco de dados
-            foto = Foto(imagem=nome_seguro,id_usuario=current_user.id)
-            database.session.add(foto)            
-            database.session.commit()
+        # Recupera fotos salvas se for o próprio perfil
+        fotos_salvas = Salvo.query.filter_by(usuario_id=current_user.id).all()
+        fotos_salvas_ids = {salvo.foto_id for salvo in fotos_salvas if salvo.ativo}
         
-        return render_template('perfil.html',titulo='Meu Perfil',usuario=current_user,
-                               formulario=formulario)
+        formulario = FormFoto()
+        # Formulario para upload de imagem
+        if request.method == 'POST':
+            if formulario.validate_on_submit():
+                # Upload da imagem
+                arquivo = formulario.foto.data
+                
+                caminho_relativo = salvar_imagem_upload(
+                    arquivo, 
+                    current_app.config['UPLOAD_FOLDER'], 
+                    current_user.id
+                )
+
+
+                 # Salva no banco
+                foto = Foto(imagem=caminho_relativo, id_usuario=current_user.id)
+                database.session.add(foto)
+                database.session.commit()
+
+                # Responder Ajax se for requisição Ajax
+                if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+                    url_imagem = url_for('static', filename=f"fotos_posts/{caminho_relativo}")
+                    
+                    return jsonify({"imagem": url_imagem})
+
+                # Se não for Ajax, redireciona normal
+                return redirect(url_for('perfil', field=current_user.id))
+
+            else:
+                # Se NÃO validou, mas é Ajax, tem que retornar erro!
+                if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+                    return jsonify({"erro": "Erro ao enviar foto."}), 400
+
+        # Se for GET ou depois do POST
+        return render_template('paginas/perfil.html',
+                               titulo='Meu Perfil',
+                               usuario=current_user,
+                               formulario=formulario,
+                               fotos_salvas=fotos_salvas,
+                               fotos_salvas_ids=fotos_salvas_ids)
 
     else:
-        # terá permissão de só ler as fotos do perfil
+        # Visitando perfil de outro usuário (apenas leitura)
         field = Usuario.query.get(int(field))
-        return render_template('perfil.html',titulo='Meu Perfil',usuario=field,formulario=None)
+        # verficar se o usuario que visita o perfil tem fotos ja salvas
+        if field is None:
+            # Se o usuário não existir, retorna 404
+            abort(404)
+        # Verifica se o usuário está autenticado e tem fotos salvas
+        if current_user.is_authenticated:
+            fotos_salvas = Salvo.query.filter_by(usuario_id=current_user.id).all()
+            fotos_salvas_ids = {salvo.foto_id for salvo in fotos_salvas if salvo.ativo}
+        else:
+            fotos_salvas = []
+            fotos_salvas_ids = set()
+        # Renderiza o perfil do usuário
 
+        return render_template('paginas/perfil.html',
+                               titulo='Meu Perfil',
+                               usuario=field,
+                               fotos_salvas=fotos_salvas,
+                               fotos_salvas_ids=fotos_salvas_ids,
+                               formulario=None)
 
 # -------Deslogar da conta logada-------
 @app.route('/sair')
@@ -133,33 +225,135 @@ def sair():
 @app.route('/feed')
 @login_required# bloqueia a pagina caso nao faço login
 def feed():
-    fotos = Foto.query.order_by(Foto.data_criacao.desc()).all()[:20]# limitar as 20 primeiras fotos
-    return render_template('feed.html',fotos=fotos)
+    fotos = Foto.query.order_by(Foto.data_criacao.desc()).all()
+    fotos = random.sample(fotos, min(50, len(fotos)))  # Limita a 50 fotos aleatórias
+    return render_template('paginas/feed.html',fotos=fotos)
 
 
 
-@app.route('/foto/<field>/excluir', methods=["GET", "POST"])
+@app.route('/foto/<int:field>/excluir', methods=["GET", "POST"])
 @login_required# bloqueia a pagina caso nao faço login
 def excluir_foto(field):
-    foto = Foto.query.get_or_404(field)
+    foto = Foto.query.get_or_404(field)    
 
     # se sou o dono da foto posso excluir
     if current_user == foto.autor:
-        database.session.delete(foto)
-        database.session.commit()
-        flash('Foto Excluida', category='alert-danger')
-        return redirect(url_for("perfil", field=current_user.id))
-    else:
-        abort(403)
+        try:
+            # Caminho da imagem
+            UPLOAD_FOLDER = current_app.config['UPLOAD_FOLDER']
+        
+            print(UPLOAD_FOLDER)
+            caminho_imagem = os.path.join(UPLOAD_FOLDER, foto.imagem)
+            
+
+            # Primeiro tenta remover o arquivo
+            if os.path.exists(caminho_imagem):
+                os.remove(caminho_imagem)
+                print(f"Arquivo {caminho_imagem} removido com sucesso!")
+            else:
+                print(f"Arquivo {caminho_imagem} não encontrado para exclusão.")
+
+            # Agora sim deleta do banco
+            database.session.delete(foto)
+            database.session.commit()
+
+            return jsonify({"status": "danger", "mensagem": "Foto Excluída"})
+
+        except Exception as e:
+            database.session.rollback()
+            print(f"Erro ao excluir foto: {e}")
+            return jsonify({"status": "danger", "mensagem": "Erro ao excluir a foto."})
+
+
+
+
 
 @app.route('/foto/<int:id>')
 def ver_foto(id):
     foto = Foto.query.get_or_404(id)
-    return render_template('ver_foto.html', foto=foto)
+    fotos_autor = Foto.query.filter(Foto.autor == foto.autor,Foto.id != foto.id).all()
+    fotos_autor = random.sample(fotos_autor, min(3, len(fotos_autor)))  # Limita a 3 fotos aleatórias do autor
+    
+
+
+    fotos_salvas_ids = set()
+    if current_user.is_authenticated:
+        fotos_salvas = Salvo.query.filter_by(usuario_id=current_user.id, ativo=True).all()
+        fotos_salvas_ids = {salvo.foto_id for salvo in fotos_salvas}
+
+    return render_template('paginas/ver_foto.html', fotos_autor=fotos_autor, foto=foto, fotos_salvas_ids=fotos_salvas_ids)
+
+
+@app.route('/foto-salva/<int:foto_id>')
+@login_required
+def ver_salvar_foto(foto_id):
+    salvo = Salvo.query.filter_by(usuario_id=current_user.id, foto_id=foto_id).first_or_404()
+    foto = salvo.foto
+    fotos_autor = Foto.query.filter(Foto.autor == foto.autor,Foto.id != foto.id).all()
+    fotos_autor = random.sample(fotos_autor, min(3, len(fotos_autor)))  # Limita a 3 fotos aleatórias do autor
+    
+
+
+    fotos_salvas_ids = {salvo.foto_id} if salvo.ativo else set()
+
+    return render_template('paginas/ver_foto.html', fotos_autor=fotos_autor ,foto=foto, fotos_salvas_ids=fotos_salvas_ids)
 
 
 
-# -------Testa funcionalidade-------
-@app.route("/teste")
-def teste():
-    return render_template('teste.html')
+@app.route('/foto/<int:field>/salvar', methods=['POST'])
+@login_required
+def salvarImagem(field):
+    foto = Foto.query.get_or_404(field)
+
+    # Verifica se já foi salva
+    ja_salva = Salvo.query.filter_by(usuario_id=current_user.id, foto_id=foto.id).first()
+
+    if ja_salva:
+        if ja_salva.ativo:
+            # Se estava ativa, desativa e remove do banco
+            database.session.delete(ja_salva)
+            database.session.commit()
+            return jsonify({
+                "status": "danger",
+                "mensagem": "Imagem removida!",
+                "ativo": False
+            })
+        else:
+            # Se estava inativa (teoricamente não deveria estar aqui), ativa
+            ja_salva.ativo = True
+            database.session.commit()
+            return jsonify({
+                "status": "success",
+                "mensagem": "Imagem salva com sucesso!",
+                "ativo": True
+            })
+
+    # Nunca foi salva → salva agora
+    novo_salvo = Salvo(usuario_id=current_user.id, foto_id=foto.id, ativo=True)
+    database.session.add(novo_salvo)
+    database.session.commit()
+
+    return jsonify({
+        "status": "success",
+        "mensagem": "Imagem salva com sucesso!",
+        "ativo": True
+    })
+
+
+
+@app.route("/salvo/<int:salvo_id>/remover", methods=["POST"])
+@login_required
+def remover_salvo(salvo_id):
+    # Excuir fotos da lista de salvas
+    
+    salvo = Salvo.query.get_or_404(salvo_id)
+    if salvo.usuario_id != current_user.id:
+        return jsonify({'mensagem': "Acesso negado.", 'status': 'danger'}), 403
+
+    database.session.delete(salvo)
+    database.session.commit()
+    
+
+    return jsonify({"status": "danger", "mensagem": "Imagem removida!"})
+
+

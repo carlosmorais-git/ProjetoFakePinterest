@@ -1,0 +1,43 @@
+{# Template parcial para o menu de salvos flutuante #}
+<!--  -->
+{% if current_user.is_authenticated and current_user.id == usuario.id %}
+
+<!-- Botão flutuante no canto inferior direito -->
+<button
+  id="botao-salvos"
+  class="botao-flutuante"
+  onclick="alternarMenuSalvos()"
+>
+  <span id="icone-botao">☰</span>
+</button>
+<!-- Menu deslizante com fotos salvas -->
+
+<div id="menu-salvos" class="menu-salvos" style="display: none">
+  <h3 class="h3_navbar">Imagens que me inspiram</h3>
+  <div class="galeria-salvos">
+    {% for salvo in fotos_salvas %}
+
+    <div class="bloco-imagem" data-salvo-id="{{ salvo.id }}">
+      <img
+        src="{{ url_for('static', filename='fotos_posts/{}'.format(salvo.foto.imagem)) }}"
+        class="img-salva"
+      />
+      <div class="acoes-img">
+        <a
+          href="{{ url_for('ver_salvar_foto', foto_id=salvo.foto.id) }}"
+          class="btn-ver"
+          >Ver</a
+        >
+        <button onclick="removerSalvo('{{ salvo.id }}')" class="btn-excluir">
+          ✖
+        </button>
+      </div>
+    </div>
+
+    {% else %}
+    <p class="galeria-salvo_mensagem">Você ainda não salvou nenhuma imagem.</p>
+    {% endfor %}
+  </div>
+</div>
+
+{% endif %}

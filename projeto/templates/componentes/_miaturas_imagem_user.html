@@ -1,0 +1,14 @@
+<div class="mais-do-autor">
+  <h3>Mais fotos de {{ foto.autor.username.title() }}</h3>
+  <div class="fotos-autor">
+    {% for outra in fotos_autor %}
+    <a href="{{ url_for('ver_foto', id=outra.id) }}">
+      <img
+        src="{{ url_for('static', filename='fotos_posts/' + outra.imagem) }}"
+        alt="foto"
+    /></a>
+    {% endfor %} {% if fotos_autor|length == 0 %}
+    <p>Sem mais fotos deste autor.</p>
+    {% endif %}
+  </div>
+</div>
