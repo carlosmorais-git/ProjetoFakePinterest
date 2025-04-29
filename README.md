@@ -31,11 +31,10 @@ python -m venv venv
 source venv/bin/activate  # ou venv\Scripts\activate no Windows
 pip install -r requirements.txt
 flask --app projeto run --debug
+```
 
 - Crie a estrutura static/fotos_posts/ caso não exista.
 - As imagens serão organizadas automaticamente conforme os uploads.
-
-
 
 📢 Observações Finais:
 
